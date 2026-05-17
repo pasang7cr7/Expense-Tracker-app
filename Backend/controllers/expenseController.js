@@ -8,7 +8,9 @@ exports.createExpenses = async (req, res, next) => {
     if (Object.keys(expenseData).length === 0) {
       throw new AppError("no data provided", 400);
     }
+    expenseData.user = req.user._id;
     const createdExpense = await Expense.create(expenseData);
+
     res.status(201).json({ success: true, data: createdExpense });
   } catch (error) {
     next(error);
@@ -18,7 +20,13 @@ exports.createExpenses = async (req, res, next) => {
 exports.deleteExpenses = async (req, res, next) => {
   try {
     const id = req.params.id;
-    console.log(id);
+
+    const expense = await Expense.findById(id);
+    if (!expense) throw new AppError("Expense not found to delete", 404);
+
+    if (expense.user.toString() !== req.user._id.toString())
+      throw new AppError("Not your expense", 403);
+
     const deletedExpense = await Expense.findByIdAndDelete(id);
     if (!deletedExpense) {
       throw new AppError("Expense not found", 404);
@@ -31,8 +39,10 @@ exports.deleteExpenses = async (req, res, next) => {
 
 exports.getExpenses = async (req, res, next) => {
   try {
-    const allExp = await Expense.find({});
-    console.log(allExp);
+    const allExp = await Expense.find({ user: req.user._id }).sort({
+      date: -1,
+    });
+    //console.log(allExp);
 
     res.status(200).json({ success: true, data: allExp });
   } catch (err) {
@@ -57,6 +67,13 @@ exports.updateExp = async (req, res, next) => {
   try {
     const id = req.params.id;
     const data = req.body;
+
+    const expense = await Expense.findById(id);
+
+    if (!expense) throw new AppError("Expense not found", 404);
+
+    if (expense.user.toString() !== req.user._id.toString())
+      throw new AppError("Not your expense", 403);
 
     if (Object.keys(data).length === 0) {
       throw new AppError("no data provided", 400);
