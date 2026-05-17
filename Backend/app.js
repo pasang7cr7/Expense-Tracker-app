@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 // local modules
 const expenseRoutes = require("./routes/expense");
 const errorHandler = require("./middleware/errorHandler");
+const authRoute = require("./routes/auth");
+
 dotenv.config();
 
 const app = express();
@@ -22,6 +24,7 @@ app.use((req, res, next) => {
 
 // routes
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/auth", authRoute);
 
 // global error handler (must be last)
 app.use(errorHandler);

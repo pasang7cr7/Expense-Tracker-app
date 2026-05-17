@@ -5,7 +5,7 @@ const Expense = require("../models/expense");
 exports.createExpenses = async (req, res, next) => {
   try {
     const expenseData = req.body;
-    if (Object.keys(data).length === 0) {
+    if (Object.keys(expenseData).length === 0) {
       throw new AppError("no data provided", 400);
     }
     const createdExpense = await Expense.create(expenseData);
